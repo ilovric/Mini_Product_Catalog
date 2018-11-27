@@ -18,10 +18,10 @@ create or replace package pkg_dozvole_zabrane as
  function f_dohvati_req_for (p_id number, p_req_for char, recursive boolean default false, p_name varchar2 default null) return varchar2;
  /* Funkcija za dohvat REQUIRED/FORBIDEN vrijednosti za neke produkte prema tablici DOZVOLE_ZABRANE
     PARAMETRI: p_id - id produkta
-               p_req_for - vrijednost koja se pretraûuje REQ ili FOR
+               p_req_for - vrijednost koja se pretra≈æuje REQ ili FOR
                recursive - varijabla za provjeru rekurzije, true je kad fj. poziva samu sebe, ina?e je dalse
                p_name - za spremanje trenutnog naziva
-    äTO FUNKCIJA VRA?A:  Funkcija vra?a string koji se sastoji od zarazeom odjeljenih REQ ili FOR produkata           
+    ≈†TO FUNKCIJA VRACA:  Funkcija vraca string koji se sastoji od zarazeom odjeljenih REQ ili FOR produkata           
  */
 
  
@@ -70,7 +70,7 @@ create or replace package body pkg_dozvole_zabrane as
         when NO_DATA_FOUND then
             return 'Produkt ne postoji';
         when TOO_MANY_ROWS then
-            return 'Vra?eno viöe redaka za produkt!';
+            return 'Vra?eno vi≈°e redaka za produkt!';
     end f_dohvati_pdt_naziv;
     
 /* ###########################################################################################
@@ -96,7 +96,7 @@ create or replace package body pkg_dozvole_zabrane as
         when no_data_found then
             return 'Produkt_atribut ne postoji';
         when too_many_rows then
-            return 'Vra?eno viöe redaka za produkt_atribut!';
+            return 'Vra?eno vi≈°e redaka za produkt_atribut!';
     end f_dohvati_pat_naziv;
     
 /* ###########################################################################################
@@ -174,10 +174,10 @@ create or replace package body pkg_dozvole_zabrane as
 /* ###########################################################################################
     Funkcija za dohvat REQUIRED/FORBIDEN vrijednosti za neke produkte prema tablici DOZVOLE_ZABRANE
     PARAMETRI: p_id - id produkta
-               p_req_for - vrijednost koja se pretraûuje REQ ili FOR
+               p_req_for - vrijednost koja se pretra≈æuje REQ ili FOR
                recursive - varijabla za provjeru rekurzije, true je kad fj. poziva samu sebe, ina?e je dalse
                p_name - za spremanje trenutnog naziva
-    äTO FUNKCIJA VRA?A:  Funkcija vra?a string koji se sastoji od zarazeom odjeljenih REQ ili FOR produkata           
+    ≈†TO FUNKCIJA VRACA:  Funkcija vraca string koji se sastoji od zarazeom odjeljenih REQ ili FOR produkata           
   ########################################################################################### */ 
    function f_dohvati_req_for (p_id number, p_req_for char, recursive boolean default false, p_name varchar2 default null)
    return varchar2

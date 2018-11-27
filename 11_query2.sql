@@ -4,24 +4,31 @@
             - Obavezni produkti: P2, P4
             - Zabranjeni produkti: P3
 */
-select lpad(' ',7*(level-1))||pdt.id ||'# '||pdt.naziv produkt 
-, null produkt_atribut
-, pkg_dozvole_zabrane.f_dohvati_pdt_req_for ( pdt.id,'REQ') "Obavezni produkti"
-, pkg_dozvole_zabrane.f_dohvati_pdt_req_for ( pdt.id,'FOR') "Zabranjeni produkti"
-from produkt pdt
-join klasa_produkta kpa on (pdt.kpa_id = kpa.id)
-start with pdt.id = :P_ID
-connect by prior pdt.id = pdt.pdt_id
-union
-select lpad(' ',7*(level-1))||pdt.id ||'# '||pdt.naziv produkt
-, pat.id ||'# '|| pdt.naziv || ' => ' || abt.naziv || ' - ' || abt.vrijednost produkt_atribut
-, pkg_dozvole_zabrane.f_dohvati_pat_req_for ( pat.id,'REQ') "Obavezni produkti"
-, pkg_dozvole_zabrane.f_dohvati_pat_req_for ( pat.id,'FOR') "Zabranjeni produkti"
-from produkt pdt
-join klasa_produkta kpa on (pdt.kpa_id = kpa.id)
-join produkt_atribut pat on (pat.pdt_id = pdt.id)
-join atribut abt on (pat.abt_id =abt.id)
-start with pdt.id = :P_ID
-connect by prior pdt.id = pdt.pdt_id
-order by 1 desc,2 desc
-;
+    with hierarchy_all as (
+     select lpad(' ',7*(level-1))||pdt.id ||'# '||pdt.naziv produkt 
+     ,    pdt.id  child_product
+     ,    pdt.pdt_id first_parent   -- neposredni roditelj
+     ,    pdt.naziv  pdt_naziv
+     ,    sys_connect_by_path(pdt.naziv, '/') as path    -- cijela putanja
+     ,    connect_by_root (pdt.id)  root_parent_name_last    --prvi roditelj id
+     ,    connect_by_root (pdt.naziv)  root_parent_name_last    --prvi roditelj name
+     ,    connect_by_isleaf   -- Pseudokolona koja vraća 1 ukoliko je trenutni redak list stabla definiranog hijerarhijskim upitom
+     ,    level   level_hijerahije
+     from produkt pdt
+     --start with pdt.id = :P_ID
+     start with pdt.pdt_id is null
+     connect by  prior pdt.id = pdt.pdt_id
+     order siblings by pdt.id asc
+  )
+  select ha.produkt hijerahija
+  ,  ha.child_product || '# ' ||ha.pdt_naziv  produkt
+  ,  pkg_dozvole_zabrane.f_dohvati_req_for ( ha.child_product,'REQ')   PRODUCT_REQUIRED
+  ,  pkg_dozvole_zabrane.f_dohvati_req_for ( ha.child_product,'FOR')   PRODUCT_FORBIDEN
+  ,  pat.id  produkt_atribut_id
+  ,  pat.id || '# ' ||pkg_dozvole_zabrane.f_dohvati_pat_naziv (pat.id) produkt_atribut_naziv
+  ,  pkg_dozvole_zabrane.f_dohvati_req_for ( pat.id,'REQ')   PRODUCT_ATRIBUT_REQUIRED
+  ,  pkg_dozvole_zabrane.f_dohvati_req_for ( pat.id,'FOR')   PRODUCT_ATRIBUT_FORBIDEN
+  from hierarchy_all ha
+  left join produkt_atribut pat on (pat.pdt_id = ha.child_product)
+  where 1 = 1
+  ;

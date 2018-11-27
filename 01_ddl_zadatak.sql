@@ -139,17 +139,14 @@ end;
 
 create table atribut
 ( id            number(10,0) not null
---, naziv         varchar2 (250) not null
 , vrijednost    varchar2 (50) not null
 , kat_id        number(10,0) not null
 , constraint abt_pk primary key (id)
---, constraint abt_uk1 unique (naziv,vrijednost)
 , constraint abt_kat_fk foreign key(kat_id) references kategorija_atributa (id)
 );
 /
 comment on table atribut is 'Tablica koja sadrži osnovne vrijednosti atributa';
 comment on column atribut.id is 'PK tablice';
---comment on column atribut.naziv is 'Naziv atributa';
 comment on column atribut.vrijednost is 'Vrijednost koju ima naziv atributa';
 comment on column atribut.kat_id is 'PK kategorija_atributa';
 /
