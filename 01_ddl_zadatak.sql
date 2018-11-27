@@ -90,6 +90,45 @@ end;
  create index pdt_kpa_fk_i on produkt (kpa_id);
  create index pdt_pdt_fk_i on produkt (pdt_id);
 / 
+
+--  ##----##----###----########-########--######----#######--########--####-------##----###---------------###----########-########--####-########--##-----##-########----###----
+--  ##---##----##-##------##----##-------##----##--##-----##-##-----##--##--------##---##-##-------------##-##------##----##-----##--##--##-----##-##-----##----##------##-##---
+--  ##--##----##---##-----##----##-------##--------##-----##-##-----##--##--------##--##---##-----------##---##-----##----##-----##--##--##-----##-##-----##----##-----##---##--
+--  #####----##-----##----##----######---##---####-##-----##-########---##--------##-##-----##---------##-----##----##----########---##--########--##-----##----##----##-----##-
+--  ##--##---#########----##----##-------##----##--##-----##-##---##----##--##----##-#########---------#########----##----##---##----##--##-----##-##-----##----##----#########-
+--  ##---##--##-----##----##----##-------##----##--##-----##-##----##---##--##----##-##-----##---------##-----##----##----##----##---##--##-----##-##-----##----##----##-----##-
+--  ##----##-##-----##----##----########--######----#######--##-----##-####--######--##-----##-#######-##-----##----##----##-----##-####-########---#######-----##----##-----##-
+create table  kategorija_atributa 
+( id            number(10,0) not null
+, naziv         varchar2 (250) not null
+
+, constraint kat_pk primary key (id)
+, constraint kat_uk1 unique (naziv)
+);
+/
+comment on table kategorija_atributa is 'Tablica za kategoriju atributa.';
+
+comment on column kategorija_atributa.id is 'PK tablice';
+comment on column kategorija_atributa.naziv is 'Naziv kategorije atributa';
+/
+ create sequence kat_seq
+ nomaxvalue
+ nominvalue
+ nocycle;
+ /
+create or replace trigger bir_kategorija_atributa_seq 
+before insert on kategorija_atributa
+    for each row
+begin
+    if (:new.id is null ) then
+        select kat_seq.nextval
+        into :new.id
+        from  dual;
+    end if;
+end;
+/
+
+
 --  ---###----########-########--####-########--##-----##-########-
 --  --##-##------##----##-----##--##--##-----##-##-----##----##----
 --  -##---##-----##----##-----##--##--##-----##-##-----##----##----
@@ -100,16 +139,19 @@ end;
 
 create table atribut
 ( id            number(10,0) not null
-, naziv         varchar2 (250) not null
+--, naziv         varchar2 (250) not null
 , vrijednost    varchar2 (50) not null
+, kat_id        number(10,0) not null
 , constraint abt_pk primary key (id)
-, constraint abt_uk1 unique (naziv,vrijednost)
+--, constraint abt_uk1 unique (naziv,vrijednost)
+, constraint abt_kat_fk foreign key(kat_id) references kategorija_atributa (id)
 );
 /
 comment on table atribut is 'Tablica koja sadrži osnovne vrijednosti atributa';
 comment on column atribut.id is 'PK tablice';
-comment on column atribut.naziv is 'Naziv atributa';
+--comment on column atribut.naziv is 'Naziv atributa';
 comment on column atribut.vrijednost is 'Vrijednost koju ima naziv atributa';
+comment on column atribut.kat_id is 'PK kategorija_atributa';
 /
 create sequence abt_seq
  nomaxvalue
@@ -126,6 +168,8 @@ begin
         from  dual;
     end if;
 end;
+/
+create index abt_kat_fk_i on atribut (kat_id);
 /
 --  ########--########---#######--########--##-----##-##----##-########------------###----########-########--####-########--##-----##-########-
 --  ##-----##-##-----##-##-----##-##-----##-##-----##-##---##-----##--------------##-##------##----##-----##--##--##-----##-##-----##----##----
@@ -169,6 +213,7 @@ end;
  create index pat_pdt_fk_i on produkt_atribut (pdt_id);
  create index pat_abt_fk_i on produkt_atribut (abt_id);
 /
+
 
 --  ##----##-##----------###-----######-----###-------------######--####-------##-########-##----##-########-
 --  ##---##--##---------##-##---##----##---##-##-----------##----##--##--------##-##-------###---##-##-------
@@ -215,7 +260,7 @@ end;
 --  ##--------##--------##-######---##-##-##-##-----##-
 --  ##--------##--##----##-##-------##--####-#########-
 --  ##----##--##--##----##-##-------##---###-##-----##-
---  -######--####--######--########-##----##-##-----##-				
+--  -######--####--######--########-##----##-##-----##-                
 
 create table cijena
 ( id            number(10,0) not null
@@ -325,7 +370,3 @@ check (    ( ( pdt_id is not null )  and ( pat_id is null ) and (req_for_pdt_id 
        or  ( ( pdt_id is null )  and ( pat_id is not null ) and (req_for_pdt_id is not null) and (req_for_pat_id is null) )
        or  ( ( pdt_id is null )  and ( pat_id is not null ) and (req_for_pdt_id is null) and (req_for_pat_id is not null) )                                                          
       );
-
-
-
-
