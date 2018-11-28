@@ -63,7 +63,7 @@ create table produkt
 /
 comment on table produkt is 'Tablica koja sadrži produkte';
 
-comment on column produkt.id is 'PK tablice';
+comment on column produkt.id is 'PK tablice, koristi istu sekvencu PDT_SEQ kao i PRODUKT_ATRIBUT';
 comment on column produkt.naziv is 'Naziv produkta';
 comment on column produkt.opis is 'Dodatni opis produkta';
 comment on column produkt.datum_od is 'Datum od kad je produkt dostupan na tržištu';
@@ -187,21 +187,23 @@ create table produkt_atribut
 );
 /
 comment on table produkt_atribut is 'Tablica koja povezuje produkte s atributima';
-comment on column produkt_atribut.id is 'PK tablice';
+comment on column produkt_atribut.id is 'PK tablice, koristi istu sekvencu PDT_SEQ kao i produkt';
 comment on column produkt_atribut.pdt_id is 'FK produkt';
 comment on column produkt_atribut.abt_id is 'FK atribut';
 /
+
+/*
 create sequence pat_seq
  nomaxvalue
  nominvalue
  nocycle;
- /
+*/
 create or replace trigger bir_produkt_atribut_seq 
 before insert on produkt_atribut
     for each row
 begin
     if (:new.id is null ) then
-        select pat_seq.nextval
+        select pdt_seq.nextval
         into :new.id
         from  dual;
     end if;
@@ -366,4 +368,4 @@ check (    ( ( pdt_id is not null )  and ( pat_id is null ) and (req_for_pdt_id 
        or  ( ( pdt_id is not null )  and ( pat_id is null ) and (req_for_pdt_id is null) and (req_for_pat_id is not null) )
        or  ( ( pdt_id is null )  and ( pat_id is not null ) and (req_for_pdt_id is not null) and (req_for_pat_id is null) )
        or  ( ( pdt_id is null )  and ( pat_id is not null ) and (req_for_pdt_id is null) and (req_for_pat_id is not null) )                                                          
-      );
+);
